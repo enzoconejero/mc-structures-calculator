@@ -1,0 +1,23 @@
+.cell{
+    display: inline-flex;
+    height: 10px;
+    width: 10px;
+    border: 1px solid black;
+    margin: 1px;
+    font-size: 10px;
+}
+
+.row{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: left;
+}
+
+.border{
+    background-color: grey;
+}
+
+.center{
+    background-color: red;
+}
