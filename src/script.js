@@ -9,19 +9,56 @@ function on_load() {
     canvas.render()
 }
 
+function clear_info(){
+    const info = document.createElement("div")
+    info.id = 'info'
+    document.querySelector("#info").replaceWith(info)
+}
+
+function add_info(text){
+    const info = document.querySelector("#info")
+    const div = document.createElement("div")
+    div.textContent = text
+    info.appendChild(div)
+}
+
 function update_and_refresh_canvas() {
     // diams
-    const penta = +document.querySelector("#pentagon").value
-    const petals = +document.querySelector("#petal").value
-    const core = +document.querySelector("#core").value
+    clear_info()
+    const pentagon_diam = +document.querySelector("#pentagon_diam").value
+    const petal_diam = +document.querySelector("#petal_diam").value
+    const petal_n = +document.querySelector("#petal_n").value
+    const rotation = +document.querySelector("#rotation").value
+    const relative_x = +document.querySelector("#relative_x").value
+    const relative_z = +document.querySelector("#relative_z").value
 
-    const side = (penta + petals) + 2
+    const side = (pentagon_diam + petal_diam) - 1
     canvas
         .clean()
         .resize(side)
-        .add_circle(canvas.center(), penta)
-        // .add_circle(canvas.center(), core)
+        .add_circle(canvas.center(), pentagon_diam)
         .render()
+
+    const pentagon = canvas.figs[0]
+    const span_len = Math.floor(pentagon.perim.length / petal_n)
+    const sub_centers = []
+    for (let i = 0; i < petal_n; i++){
+        sub_centers.push(pentagon.perim[span_len * i + Math.abs(rotation % span_len)])
+    }
+    sub_centers.forEach((c) => {
+        canvas.add_circle(c.center, petal_diam)
+    })
+    canvas.render()
+
+    add_info(`Canvas side dimentions: ${side} blocks`)
+    add_info('Canvas realtive square coordinates (blue points)(x, z)')
+    add_info(`(x, z): ${relative_x}, ${relative_z} --> ${relative_x+side}, ${relative_z+side}`)
+
+    sub_centers.forEach((c) => {
+        let x = c.zero.x + relative_x
+        let z = canvas.side_len - c.zero.y - 1 + relative_z
+        add_info(`Center: (${x}, ${z})`)
+    })
 }
 
 function _distance(p1, p2) {
@@ -64,6 +101,8 @@ class Canvas {
         document.querySelector("#canvas").replaceWith(new_cavas)
 
         this.figs.forEach((f) => f.render())
+        new Cell(0, this.side_len - 1).elem().classList.add("relative-zero")
+        new Cell(this.side_len - 1, 0).elem().classList.add("relative-zero")
         return this
     }
 
@@ -95,7 +134,7 @@ class Cell {
         this.col = Math.floor(x)
         this.row = Math.floor(y)
         this.zero = new Point(this.col, this.row)  // Start poistion: left bottom
-        this.center = new Point(x + 0.5, y + 0.5)
+        this.center = new Point(this.col + 0.5, this.row + 0.5)
     }
 
     html() {
@@ -132,9 +171,10 @@ class Circle {
         // The center is either a single cell or the intersection between 4
         this.center_point = center_point
         this.diam = diam
+        this.perim = []
     }
 
-    render() {
+    generate_perim() {
         const radius = this.diam / 2
         const has_symetry_cell = (this.diam % 2) != 0
         const symetry_offset = has_symetry_cell ? 0 : 1
@@ -143,7 +183,7 @@ class Circle {
         const main_center_cell = new Cell(this.center_point.x, this.center_point.y)
         let centers, reference_center_point
 
-        if (has_symetry_cell){
+        if (has_symetry_cell) {
             // The center is within the center of a cell
             centers = [main_center_cell]
             reference_center_point = main_center_cell.center
@@ -152,17 +192,17 @@ class Circle {
             centers = [
                 main_center_cell,
                 main_center_cell.move(-1, 0),
-                main_center_cell.move(0, 1),
-                main_center_cell.move(-1, 1)
+                main_center_cell.move(0, -1),
+                main_center_cell.move(-1, -1)
             ]
             reference_center_point = main_center_cell.zero
         }
-        
+
         centers.forEach((c) => {
             c.elem().classList.add("center")
         })
 
-        let left_cell = new Cell(reference_center_point.x - radius, reference_center_point.y)
+        let left_cell = new Cell(reference_center_point.x - radius, reference_center_point.y - symetry_offset)
         let top_cell = new Cell(reference_center_point.x - symetry_offset, reference_center_point.y - radius)
         let cells = [left_cell]
 
@@ -211,20 +251,27 @@ class Circle {
 
         let q34 = to_mirror.map((cell) => {
             let dist_to_center = Math.ceil(Math.abs(this.center_point.y - cell.center.y))
-            return cell.move(0, dist_to_center * 2 + symetry_offset)
+            return cell.move(0, dist_to_center * 2 - symetry_offset)
         })
 
         cells = cells.concat(q34)
+        this.perim = cells
 
         // let cells = q1.concat(q2).concat(q34)
+    }
 
-        cells.forEach((c) => {
+    render() {
+        if (this.perim.length == 0) {
+            this.generate_perim()
+        }
+
+        this.perim.forEach((c) => {
             c.elem().classList.add("border")
         })
 
-        for (let i = 0; i < cells.length; i++){
-            cells[i].elem().textContent = i
-        }
+        // for (let i = 0; i < this.perim.length; i++) {
+        //     this.perim[i].elem().textContent = i
+        // }
     }
 }
 

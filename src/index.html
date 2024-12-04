@@ -4,15 +4,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style.css">
-    <script src="enzo.js"></script>
+    <script src="script.js"></script>
 </head>
 <body>
-    <h1>Holanda quetalanda</h1>
+    <h1>Minecraft Petal structure generator</h1>
     <button onclick="update_and_refresh_canvas()">Render</button>
-    <label for="#pentagon">Pentagon: <input type="number" name="pentagon" id="pentagon" value="10"></label>
-    <label for="#petal">Petals: <input type="number" name="petal" id="petal" value="1"></label>
-    <label for="#core">Core: <input type="number" name="core" id="core" value="1"></label>
+    <div id="form" style="display: block;">
+        <div>Pentagon diam: <input type="number" name="pentagon" id="pentagon_diam" value="29"></div>
+        <div>Petals diam: <input type="number" name="petal" id="petal_diam" value="19"></div>
+        <div>Petals num: <input type="number" name="petal" id="petal_n" value="5"></div>
+        <div>Rotation: <input type="number" name="rotation" id="rotation" value="0"></div>
+        <div>Relative X, Z: <input type="number" name="relative_x" id="relative_x" value="0"><input type="number" name="relative_z" id="relative_z" value="0"></div>
+    </div>
     <div id="canvas"></div>
+    <div id="info"></div>
 </body>
 <script>
     on_load()

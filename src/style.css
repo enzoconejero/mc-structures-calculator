@@ -21,3 +21,12 @@
 .center{
     background-color: red;
 }
+
+.relative-zero{
+    background-color: blue;
+}
+
+input {
+    max-width: 15ch;
+}
+
